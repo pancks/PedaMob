@@ -77,10 +77,10 @@ class ControlActivity : AppCompatActivity() {
             Toasty.error(context, "$e").show()
         }
         val mediaType = "application/json; charset=utf-8".toMediaType()
-        val body = jsonObj.toString().toRequestBody(mediaType)
+        val bodyJson = jsonObj.toString().toRequestBody(mediaType)
         val request: Request = Request.Builder()
                 .url(url)
-                .post(body)
+                .post(bodyJson)
                 .addHeader("accept", "application/json")
                 .build()
         val client = OkHttpClient()
@@ -92,9 +92,12 @@ class ControlActivity : AppCompatActivity() {
                     Toasty.error(context, "$e", Toasty.LENGTH_LONG).show()
                 }
             }
-
             override fun onResponse(call: Call, response: Response) {
-                val jObj = JSONObject(response.body.toString())
+                val jObj = try {
+                    JSONObject(response.body!!.string())
+                } catch (e: Exception){
+                    JSONObject()
+                }
                 status = try {
                     jObj.getInt("status")
                 } catch (e: Exception) {
