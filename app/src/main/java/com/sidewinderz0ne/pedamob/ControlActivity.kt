@@ -1,6 +1,7 @@
 package com.sidewinderz0ne.pedamob
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -32,52 +33,17 @@ class ControlActivity : AppCompatActivity() {
         setContentView(R.layout.activity_control)
         initView()
         btMap.setOnClickListener {
-            //postData()
-            //CURL(tvLoc).execute()
-
-
-            //okhttp(tvLoc)
-
-            val requestBody: RequestBody = MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("idkey", "4574214")
-                    .build()
-            val request: okhttp3.Request = okhttp3.Request.Builder()
-                    .url("http://103.140.90.58:8000/getmap")
-                    .method("POST", requestBody)
-                    .addHeader("accept", "application/json")
-                    .addHeader("Content-Type", "null")
-                    .build()
-            val client = OkHttpClient()
-            client.newCall(request).enqueue(object : Callback {
-
-                @Throws(IOException::class)
-                override fun onFailure(call: Call, e: java.io.IOException) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onResponse(call: Call, response: okhttp3.Response) {
-                    runOnUiThread(Runnable { //Handle UI here
-                        tvLoc.text = response.toString()
-                    })
-                }
-            })
-
+            execAPI("http://103.140.90.58:8000/getmap",this)
         }
         btLock.setOnClickListener {
-            lock()
+            execAPI("http://103.140.90.58:8000/lock",this)
         }
         btUnlock.setOnClickListener {
-            unlock()
+            execAPI("http://103.140.90.58:8000/unlock",this)
         }
-    }
-
-    private fun lock() {
-
-    }
-
-    private fun unlock() {
-
+        btStatus.setOnClickListener {
+            execAPI("http://103.140.90.58:8000/status",this)
+        }
     }
 
     private fun initView() {
@@ -97,6 +63,39 @@ class ControlActivity : AppCompatActivity() {
         @Suppress("DEPRECATION")
         lottie.loop(true)
         lottie.playAnimation()
+    }
+
+    fun execAPI(url: String, context: Context){
+        progressBarHolder.visibility = View.VISIBLE
+        val requestBody: RequestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("idkey", id)
+                .build()
+        val request: okhttp3.Request = okhttp3.Request.Builder()
+                .url(url)
+                .method("POST", requestBody)
+                .addHeader("accept", "application/json")
+                .addHeader("Content-Type", "null")
+                .build()
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(object : Callback {
+
+            @Throws(IOException::class)
+            override fun onFailure(call: Call, e: java.io.IOException) {
+                runOnUiThread(Runnable { //Handle UI here
+                    progressBarHolder.visibility = View.GONE
+                    Toasty.error(context,"$e",Toasty.LENGTH_LONG).show()
+                })
+            }
+
+            override fun onResponse(call: Call, response: okhttp3.Response) {
+                runOnUiThread(Runnable { //Handle UI here
+                    progressBarHolder.visibility = View.GONE
+                    Toasty.success(context,response.toString(),Toasty.LENGTH_LONG).show()
+                    tvLoc.text = response.toString()
+                })
+            }
+        })
     }
 
     private fun getMap() {

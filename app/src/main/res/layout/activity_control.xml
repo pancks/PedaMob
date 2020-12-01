@@ -20,16 +20,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="3"
+        android:weightSum="2"
         app:layout_constraintBottom_toBottomOf="parent">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btMap"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:text="GETMAP" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btLock"
@@ -46,6 +38,32 @@
             android:layout_margin="10dp"
             android:layout_weight="1"
             android:text="UNLOCK" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearButtonAtas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        app:layout_constraintBottom_toTopOf="@+id/linearButton">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btMap"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:text="GETMAP" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:text="STATUS" />
 
     </LinearLayout>
 
