@@ -1,8 +1,9 @@
 package com.sidewinderz0ne.pedamob
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -16,8 +17,10 @@ import org.json.JSONObject
 
 
 lateinit var id: String
+var status = 500
 var lat = 0f
 var lon = 0f
+var update = 0f
 
 class ControlActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +39,13 @@ class ControlActivity : AppCompatActivity() {
         btStatus.setOnClickListener {
             execAPI("http://103.140.90.58:8000/status",this)
         }
+        btGMap.visibility = View.GONE
+        btGMap.setOnClickListener {
+            val gmmIntentUri = Uri.parse("google.navigation:q=$lat,$lon")
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapIntent.setPackage("com.google.android.apps.maps");
+            startActivity(mapIntent)
+        }
     }
 
     private fun initView() {
@@ -46,8 +56,6 @@ class ControlActivity : AppCompatActivity() {
             Toasty.error(this, "$e").show()
             "0"
         }
-        Log.d("controlmap", "id=$id")
-
         Glide.with(this)//GLIDE LOGO FOR LOADING LAYOUT
                 .load(R.drawable.ic_launcher_background)
                 .into(logo_loading)
@@ -67,16 +75,10 @@ class ControlActivity : AppCompatActivity() {
         }
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val body = jsonObj.toString().toRequestBody(mediaType)
-        /*val requestBody: RequestBody = MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("idkey", id)
-                .build()*/
         val request: Request = Request.Builder()
                 .url(url)
                 .post(body)
-                //.method("POST", requestBody)
                 .addHeader("accept", "application/json")
-                //.addHeader("Content-Type", "null")
                 .build()
         val client = OkHttpClient()
         client.newCall(request).enqueue(object : Callback {
@@ -88,10 +90,35 @@ class ControlActivity : AppCompatActivity() {
                 }
             }
             override fun onResponse(call: Call, response: Response) {
+                val jObj = JSONObject(response.body.toString())
+                status = try {
+                    jObj.getInt("status")
+                }catch (e:Exception){
+                    500
+                }
+                lat = try {
+                    jObj.getString("lat").toFloat()
+                }catch (e:Exception){
+                    0f
+                }
+                lon = try {
+                    jObj.getString("lon").toFloat()
+                }catch (e:Exception){
+                    0f
+                }
+                update = try {
+                    jObj.getString("lon").toFloat()
+                }catch (e:Exception){
+                    0f
+                }
                 runOnUiThread {
+                    if (url.contains("getmap") && lat!=0f){
+                        btGMap.visibility = View.VISIBLE
+                    }
+                    tvLoc.text = "status=$status, lat=$lat, lon=$lon, update=$update"
                     progressBarHolder.visibility = View.GONE
                     Toasty.success(context, response.toString(), Toasty.LENGTH_LONG).show()
-                    tvLoc.text = response.toString()
+                    tvResponse.text = response.toString()
                 }
             }
         })
