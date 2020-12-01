@@ -14,13 +14,16 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 lateinit var id: String
 var status = 500
 var lat = 0f
 var lon = 0f
-var update = 0f
+var update = 0L
+var date = ""
 
 class ControlActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,16 +31,16 @@ class ControlActivity : AppCompatActivity() {
         setContentView(R.layout.activity_control)
         initView()
         btMap.setOnClickListener {
-            execAPI("http://103.140.90.58:8000/getmap",this)
+            execAPI("http://103.140.90.58:8000/getmap", this)
         }
         btLock.setOnClickListener {
-            execAPI("http://103.140.90.58:8000/lock",this)
+            execAPI("http://103.140.90.58:8000/lock", this)
         }
         btUnlock.setOnClickListener {
-            execAPI("http://103.140.90.58:8000/unlock",this)
+            execAPI("http://103.140.90.58:8000/unlock", this)
         }
         btStatus.setOnClickListener {
-            execAPI("http://103.140.90.58:8000/status",this)
+            execAPI("http://103.140.90.58:8000/status", this)
         }
         btGMap.visibility = View.GONE
         btGMap.setOnClickListener {
@@ -71,7 +74,7 @@ class ControlActivity : AppCompatActivity() {
         try {
             jsonObj.put("idkey", id)
         }catch (e: Exception){
-            Toasty.error(context,"$e").show()
+            Toasty.error(context, "$e").show()
         }
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val body = jsonObj.toString().toRequestBody(mediaType)
@@ -89,33 +92,36 @@ class ControlActivity : AppCompatActivity() {
                     Toasty.error(context, "$e", Toasty.LENGTH_LONG).show()
                 }
             }
+
             override fun onResponse(call: Call, response: Response) {
                 val jObj = JSONObject(response.body.toString())
                 status = try {
                     jObj.getInt("status")
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     500
                 }
                 lat = try {
                     jObj.getString("lat").toFloat()
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     0f
                 }
                 lon = try {
                     jObj.getString("lon").toFloat()
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     0f
                 }
                 update = try {
-                    jObj.getString("lon").toFloat()
-                }catch (e:Exception){
-                    0f
+                    jObj.getString("lon").toLong()
+                } catch (e: Exception) {
+                    0L
                 }
                 runOnUiThread {
-                    if (url.contains("getmap") && lat!=0f){
+                    if (url.contains("getmap") && lat != 0f) {
                         btGMap.visibility = View.VISIBLE
                     }
-                    tvLoc.text = "status=$status, lat=$lat, lon=$lon, update=$update"
+                    val sdf = SimpleDateFormat("dd/MM/yyyy")
+                    date = sdf.format(Date(update))
+                    tvLoc.text = "status=$status, lat=$lat, lon=$lon, update=$update, date=$date"
                     progressBarHolder.visibility = View.GONE
                     Toasty.success(context, response.toString(), Toasty.LENGTH_LONG).show()
                     tvResponse.text = response.toString()
