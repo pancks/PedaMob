@@ -9,7 +9,10 @@ import com.bumptech.glide.Glide
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_control.*
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
+import org.json.JSONObject
 
 
 lateinit var id: String
@@ -54,35 +57,42 @@ class ControlActivity : AppCompatActivity() {
         lottie.playAnimation()
     }
 
-    fun execAPI(url: String, context: Context){
+    private fun execAPI(url: String, context: Context){
         progressBarHolder.visibility = View.VISIBLE
-        val requestBody: RequestBody = MultipartBody.Builder()
+        val jsonObj = JSONObject()
+        try {
+            jsonObj.put("idkey", id)
+        }catch (e: Exception){
+            Toasty.error(context,"$e").show()
+        }
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val body = jsonObj.toString().toRequestBody(mediaType)
+        /*val requestBody: RequestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("idkey", id)
-                .build()
-        val request: okhttp3.Request = okhttp3.Request.Builder()
+                .build()*/
+        val request: Request = Request.Builder()
                 .url(url)
-                .method("POST", requestBody)
+                .post(body)
+                //.method("POST", requestBody)
                 .addHeader("accept", "application/json")
-                .addHeader("Content-Type", "null")
+                //.addHeader("Content-Type", "null")
                 .build()
         val client = OkHttpClient()
         client.newCall(request).enqueue(object : Callback {
-
             @Throws(IOException::class)
             override fun onFailure(call: Call, e: java.io.IOException) {
-                runOnUiThread(Runnable { //Handle UI here
+                runOnUiThread {
                     progressBarHolder.visibility = View.GONE
-                    Toasty.error(context,"$e",Toasty.LENGTH_LONG).show()
-                })
+                    Toasty.error(context, "$e", Toasty.LENGTH_LONG).show()
+                }
             }
-
-            override fun onResponse(call: Call, response: okhttp3.Response) {
-                runOnUiThread(Runnable { //Handle UI here
+            override fun onResponse(call: Call, response: Response) {
+                runOnUiThread {
                     progressBarHolder.visibility = View.GONE
-                    Toasty.success(context,response.toString(),Toasty.LENGTH_LONG).show()
+                    Toasty.success(context, response.toString(), Toasty.LENGTH_LONG).show()
                     tvLoc.text = response.toString()
-                })
+                }
             }
         })
     }
