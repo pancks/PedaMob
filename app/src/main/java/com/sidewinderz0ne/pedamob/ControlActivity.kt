@@ -1,26 +1,15 @@
 package com.sidewinderz0ne.pedamob
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_control.*
 import okhttp3.*
 import okio.IOException
-import org.json.JSONException
-import org.json.JSONObject
 
 
 lateinit var id: String
